@@ -40,6 +40,7 @@ let database = {
     const operation = sqlQuery.split(' ')[0]
     if (operation === 'create') return this.createTable(sqlQuery)
     if (operation === 'insert') return this.insert(sqlQuery)
+    if (operation === 'select') return this.select(sqlQuery)
 
     throw new DatabaseError(sqlQuery, `Syntax error: ${sqlQuery}`)
   },
@@ -53,6 +54,25 @@ let database = {
     })
 
     this.tables[tableName].data.push(row)
+  },
+  select(sqlQuery) {
+    let [, columns, tableName, whereClause] = sqlQuery.match(
+      /select (.+) from ([a-z]+)(?: where (.+))?/,
+    )
+    let rows = this.tables[tableName].data
+    if (whereClause) {
+      let [field, value] = whereClause.split(' = ')
+      rows = rows.filter((row) => row[field] === value)
+    }
+    columns = columns.split(', ')
+    rows = rows.map((row) => {
+      let obj = {}
+      columns.forEach((column) => {
+        obj[column] = row[column]
+      })
+      return obj
+    })
+    console.log(JSON.stringify(rows, null, 2))
   },
 }
 
@@ -69,6 +89,8 @@ try {
   database.execute(
     'insert into author (id, name, age) values (3, Martin Fowler, 54)',
   )
+  database.execute('select name, age from author')
+  database.execute('select name, age from author where id = 1')
   console.log(JSON.stringify(database.tables, undefined, ' '))
 } catch (e) {
   console.log(e)
