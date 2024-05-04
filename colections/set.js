@@ -46,3 +46,45 @@ set.add(10);
 set.add(10);
 
 console.log(set);
+
+
+//WeakSet: é um ojbeto que permite apenas valores do tipo Object e mantém as referências de forma fraca, sendo volátil e não iterável
+
+
+//acoes
+//add: adiciona um elemento
+//has: retorna true se um elemento existe
+//delete: remove um elemento
+
+const ws1 = new WeakSet();
+
+const obj1 = {};
+const obj2 = {};
+
+ws1.add(obj1);
+ws1.add(obj2);
+console.log(ws1.has(obj1));
+console.log(ws1.has(obj2));
+
+//Serve para criar coleções de elementos sem se preocupar com possíveis memory leaks (vazamentos de memória)
+
+const circles = new WeakSet();
+
+function Circle(radius) {
+  circles.add(this);
+  this.radius = radius;
+}
+
+Circle.prototype.calculateArea = function() {
+  if (!circles.has(this)) {
+    throw "Invalid object";
+  }
+  return Math.PI * Math.pow(this.radius, 2);
+}
+
+const circle1 = new Circle(10);
+const circle2 = {
+  radius: 5,
+};
+console.log(circle1.calculateArea());
+console.log(circle1.calculateArea.call(circle2));
